@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.example.vue3.mapper.MyUserMapper">
+<mapper namespace="com.lmm.task.mapper.MyUserMapper">
 
-    <resultMap id="resultMap" type="com.example.vue3.entity.MyUser">
+    <resultMap id="resultMap" type="com.lmm.task.entity.MyUser">
         <id property="myUserId" column="my_user_id"></id>
         <result property="username" column="username"></result>
         <result property="password" column="password"></result>
@@ -16,8 +16,29 @@
         </collection>
 
     </resultMap>
+    <resultMap id="MyUserBaseInfo" type="com.lmm.task.entity.MyUserBaseInfo">
+        <id property="baseInfoId" column="base_info_id"></id>
+        <result property="userId" column="userId"></result>
+        <result property="account" column="account"></result>
+        <!--        <result property="roleLevel" column="roleLevel"></result>-->
+        <result property="addr" column="addr"></result>
+        <result property="phone" column="phone"></result>
+        <result property="realName" column="real_name"></result>
+        <result property="deptName" column="deptName"></result>
+        <result property="gender" column="gender"></result>
+        <result property="relation" column="relation"></result>
+        <result property="deptId" column="deptId"></result>
 
-    <select id="getUserDetail" resultMap="resultMap" >
+        <collection property="roleLevel" ofType="integer">
+            <result column="roleLevel"></result>
+        </collection>
+
+        <collection property="roleName" ofType="string">
+            <result column="roleName"></result>
+        </collection>
+
+    </resultMap>
+    <select id="getUserDetail" resultMap="resultMap">
         select my_user_id
              , username
              , password
@@ -27,10 +48,96 @@
              , authority_name
              , enabled
         from my_user
-                 join user_role ur on my_user.my_user_id = ur.user_id
-                 join role_authority ra on ur.role_id = ra.role_id
-                 join authority a on a.id = ra.authority_id
+                 left join user_role ur on my_user.my_user_id = ur.user_id
+                 left join role_authority ra on ur.role_id = ra.role_id
+                 left join authority a on a.id = ra.authority_id
         where username = #{username}
+    </select>
+    <select id="getUserInfo" resultMap="MyUserBaseInfo">
+        select base_info_id,
+               a.my_user_id userId,
+               f.username   account,
+               e.level      roleLevel,
+               c.dept_name  deptName,
+               c.dept_id    deptId,
+               e.name       roleName,
+               a.addr,
+               a.gender,
+               a.relation,
+               a.phone,
+               a.real_name
+
+        from base_info a
+                 join user_role b on a.my_user_id = b.user_id
+                 join dept c on a.dept_id = c.dept_id
+                 join user_role d on a.my_user_id = d.user_id
+                 join role e on d.role_id = e.id
+                 join my_user f on a.my_user_id = f.my_user_id
+
+        where a.my_user_id = #{id}
+    </select>
+    <select id="getAllUserByDept" resultType="com.lmm.task.entity.BaseInfo">
+        select base_info.my_user_id myUserId
+        , d.dept_id deptId
+        , base_info.phone
+        , d.dept_name
+        , base_info.real_name
+        , base_info.addr
+        , base_info.base_info_id
+        , mu.username account
+        ,base_info.gender
+        ,base_info.relation
+        ,base_info.is_host
+        from base_info
+        left join dept d on base_info.dept_id = d.dept_id
+        left join my_user mu on base_info.my_user_id = mu.my_user_id
+
+
+        where 1=1
+        <if test="ids != null and ids.size() != 0">
+            and base_info.dept_id in
+            <foreach collection="list" open="(" separator="," close=")" item="id">
+                #{id}
+            </foreach>
+        </if>
+
+
+    </select>
+
+
+
+    <select id="getSingleUserByDept" resultType="com.lmm.task.entity.BaseInfo">
+        select base_info.my_user_id myUserId
+        , d.dept_id deptId
+        , base_info.phone
+        , d.dept_name
+        , base_info.real_name
+        , base_info.addr
+        , base_info.base_info_id
+        , mu.username account
+        ,base_info.gender
+        ,base_info.relation
+        ,base_info.is_host
+        from base_info
+        left join dept d on base_info.dept_id = d.dept_id
+        left join my_user mu on base_info.my_user_id = mu.my_user_id
+
+
+        where base_info.my_user_id = #{userId}
+
+
+    </select>
+
+
+    <select id="searchByNameOrAccount" resultType="com.lmm.task.entity.MyUserBaseVO">
+
+        select bi.my_user_id userId,
+               real_name     realName,
+               username      account
+        from my_user
+                 left join base_info bi on my_user.my_user_id = bi.my_user_id
+        where my_user.username like concat('%', #{key}, '%')
+           or bi.real_name like concat('%', #{key}, '%')
     </select>
 
 </mapper>

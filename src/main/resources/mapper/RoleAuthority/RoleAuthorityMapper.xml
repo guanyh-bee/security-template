@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lmm.task.mapper.role.RoleAuthorityMapper">
+    <!--    <resultMap id="roleAuthority" type="com.lmm.task.entity.role.UserRoleVO">-->
+    <!--        <id property="userId" column="userId"></id>-->
+    <!--        <result property="account" column="account"></result>-->
+    <!--        <result property="deptId" column="deptId"></result>-->
+    <!--        <result property="realName" column="realName"></result>-->
+    <!--        <collection property="roles" ofType="com.lmm.task.entity.role.Role">-->
+    <!--            <id property="id" column="roleId"></id>-->
+    <!--            <result property="name" column="roleName"></result>-->
+    <!--            <result property="level" column="level"></result>-->
+    <!--        </collection>-->
+    <!--    </resultMap>-->
+
+
+    <resultMap id="roleAuthority" type="com.lmm.task.entity.role.UserRoleVO">
+        <id property="userId" column="userId"></id>
+        <result property="account" column="account"></result>
+        <result property="deptId" column="deptId"></result>
+        <result property="realName" column="realName"></result>
+        <result property="enabled" column="enabled"></result>
+        <collection property="roles" column="userId" select="selectRole">
+        </collection>
+    </resultMap>
+
+
+    <select id="selectRole" resultType="com.lmm.task.entity.role.Role">
+        select c.id, c.level, c.name
+        from my_user a
+                 left join user_role b on a.my_user_id = b.user_id
+                 join role c on c.id = b.role_id
+        where a.my_user_id = #{userId}
+
+    </select>
+
+
+    <select id="getRoleByUser" resultMap="roleAuthority">
+        select a.my_user_id userId,
+               a.username   account,
+               b.dept_id    deptId,
+               b.real_name  realName,
+               a.enabled    enabled
+
+
+        from my_user a
+                 left join base_info b on a.my_user_id = b.my_user_id
+                 join dept c on c.dept_id = b.dept_id
+
+
+    </select>
+
+    <!--    <select id="getRoleByUser" resultMap="roleAuthority" >-->
+    <!--        select a.my_user_id userId,-->
+    <!--               a.username   account,-->
+    <!--               b.dept_id    deptId,-->
+    <!--               b.real_name  realName,-->
+
+
+    <!--               e.id         roleId,-->
+    <!--               e.name       roleName,-->
+    <!--               e.level      level-->
+    <!--        from my_user a-->
+    <!--                 left join base_info b on a.my_user_id = b.my_user_id-->
+    <!--                 join dept c on c.dept_id = b.dept_id-->
+    <!--                 right join user_role d on d.user_id = a.my_user_id-->
+    <!--                 left join role e on d.role_id = e.id-->
+
+    <!--    </select>-->
+
+    <resultMap id="roleAuthorities_ss" type="com.lmm.task.entity.role.RoleAuthorityVO">
+        <id column="role_id"></id>
+        <association property="role" javaType="com.lmm.task.entity.role.Role">
+            <id property="id" column="role_id"></id>
+            <result property="name" column="role_name"></result>
+            <result property="level" column="role_level"></result>
+        </association>
+
+        <collection property="authorities" javaType="list" ofType="com.lmm.task.entity.MyAuthority">
+            <id property="id" column="authority_id"></id>
+            <result property="authorityName" column="authority_name"></result>
+            <result property="url" column="url"></result>
+            <result property="enable" column="enable"></result>
+        </collection>
+    </resultMap>
+
+    <select id="getRoleAuthority" resultMap="roleAuthorities_ss">
+        select a.id              role_id,
+               a.name            role_name,
+               a.level           role_level,
+               a2.id             authority_id,
+               a2.authority_name authority_name,
+               a2.url            url,
+               a2.enable         enable
+        from role a
+                 left join role_authority ra on a.id = ra.role_id
+                 left join authority a2 on a2.id = ra.authority_id
+    </select>
+
+</mapper>

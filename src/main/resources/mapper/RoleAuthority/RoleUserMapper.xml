@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lmm.task.mapper.role.RoleUserMapper">
+    <resultMap id="roleUser" type="com.lmm.task.entity.role.RoleUserVO">
+        <id property="roleId" column="role_id"></id>
+        <result property="roleName" column="role_name"></result>
+        <result property="enabled" column="enabled"></result>
+        <collection property="users" ofType="com.lmm.task.entity.role.SimpleUser">
+            <id property="userId" column="my_user_id"></id>
+            <result property="realName" column="real_name"></result>
+        </collection>
+    </resultMap>
+
+    <select id="getUserByRole" resultMap="roleUser">
+        select r.id        role_id,
+               r.name      role_name,
+               a.user_id   my_user_id,
+               b.real_name real_name,
+
+        from user_role a
+                 join base_info b on a.user_id = b.my_user_id
+                 join role r on a.role_id = r.id
+
+
+        where r.id = ${id}
+
+    </select>
+
+</mapper>
