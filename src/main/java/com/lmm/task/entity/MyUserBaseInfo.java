@@ -21,6 +21,9 @@ public class MyUserBaseInfo {
     private Integer gender;
     private String relation;
     private boolean isHost;
+    private String idCardNum;
+    private String nation;
+    private String jvZhuQingKuang;
     private List<String> listAuthorities;
 
 }

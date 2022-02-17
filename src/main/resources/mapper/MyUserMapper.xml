@@ -28,6 +28,9 @@
         <result property="gender" column="gender"></result>
         <result property="relation" column="relation"></result>
         <result property="deptId" column="deptId"></result>
+        <result property="idCardNum" column="idCardNum"></result>
+        <result property="jvZhuQingKuang" column="jvZhuQingKuang"></result>
+        <result property="nation" column="nation"></result>
 
         <collection property="roleLevel" ofType="integer">
             <result column="roleLevel"></result>
@@ -65,7 +68,10 @@
                a.gender,
                a.relation,
                a.phone,
-               a.real_name
+               a.real_name,
+               a.id_card_num   idCardNum,
+               a.nation nation,
+               a.jv_zhu_qing_kuang jvZhuQingKuang
 
         from base_info a
                  join user_role b on a.my_user_id = b.user_id

@@ -123,7 +123,6 @@ public class DeptController {
     @PostMapping("/addDept")
     @Transactional
     public CommonResult addDept(@RequestBody JSONObject object) {
-        System.out.println("object = " + object);
         Integer deptParentId = object.getInteger("deptParentId");
         String deptName = object.getString("deptName");
         String type = object.getString("type");
@@ -204,7 +203,6 @@ public class DeptController {
     @PostMapping("/updateNameAndInfo")
     @Transactional
     public CommonResult<Void> updateName(@RequestBody JSONObject object) {
-        System.out.println("object = " + object);
         String type = object.getString("type");
         if (object.getString("deptName").isEmpty() && object.getInteger("deptId") == null) {
             return new CommonResult<>(ErrorCode.COMMON_TYPE);

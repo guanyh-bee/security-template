@@ -5,8 +5,12 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.promeg.pinyinhelper.Pinyin;
 import com.lmm.task.entity.MyUserBaseInfo;
 import com.lmm.task.entity.task.*;
+import com.lmm.task.entity.user.SpecialIdentity;
+import com.lmm.task.entity.user.WorkCircumstances;
 import com.lmm.task.mapper.MyUserMapper;
 import com.lmm.task.mapper.task.*;
+import com.lmm.task.mapper.user.SpecialIdentityMapper;
+import com.lmm.task.mapper.user.WorkCircumstancesMapper;
 import com.lmm.task.utils.SecurityUtils;
 import com.lmm.task.utils.errorCode.CommonResult;
 import com.lmm.task.utils.errorCode.ErrorCode;
@@ -33,6 +37,10 @@ public class TaskController {
     TaskResultMapper taskResultMapper;
     @Autowired
     ResultDataMapper resultDataMapper;
+    @Autowired
+    WorkCircumstancesMapper workCircumstancesMapper;
+    @Autowired
+    SpecialIdentityMapper specialIdentityMapper;
 
     @Autowired
     MyUserMapper userMapper;
@@ -203,7 +211,17 @@ if (taskItem.getTaskItemUnit() == ""){
         List<TaskResultVO> collect = results.stream().map(taskResult -> {
             TaskResultVO taskResultVO = new TaskResultVO();
             BeanUtils.copyProperties(taskResult,taskResultVO);
+
             MyUserBaseInfo userInfo = userMapper.getUserInfo(taskResult.getTaskUserId());
+            QueryWrapper<SpecialIdentity> specialIdentityQueryWrapper = new QueryWrapper<>();
+            specialIdentityQueryWrapper.eq("user_id",userInfo.getUserId());
+            SpecialIdentity specialIdentity = specialIdentityMapper.selectOne(specialIdentityQueryWrapper);
+            QueryWrapper<WorkCircumstances> workCircumstancesQueryWrapper = new QueryWrapper<>();
+            workCircumstancesQueryWrapper.eq("user_id",userInfo.getUserId());
+            WorkCircumstances workCircumstances = workCircumstancesMapper.selectOne(workCircumstancesQueryWrapper);
+            taskResultVO.setSpecialIdentity(specialIdentity);
+            taskResultVO.setWorkCircumstances(workCircumstances);
+
             userInfo.setDeptName(SecurityUtils.getWholeDeptName(userInfo.getDeptId()));
             taskResultVO.setInfo(userInfo);
             return taskResultVO;
